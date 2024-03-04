@@ -9,7 +9,7 @@ env = gym.make("highway-fast-v0")
 config = {
     "observation": {
         "type": "Kinematics",
-        "vehicles_count": 15,
+        "vehicles_count": 10,
         "features": ["presence", "x", "y", "vx", "vy"],
         "features_range": {
             "x": [-100, 100],
@@ -22,21 +22,28 @@ config = {
     }
 }
 
-env.configure(config)
+env.unwrapped.configure(config)
 obs, info = env.reset()
-model = PPO("MlpPolicy", env, verbose=1)
-model.learn(total_timesteps=10_000)
-model.save("ppoHigh")
-
+# model = PPO("MlpPolicy", env, verbose=1)
+vec_env = env
+# model.learn(total_timesteps=10)
+# model.save("ppoHigh")
+model = PPO.load("ppoHigh", env=env)
+obs_act =  []
 vec_env = model.get_env()
 obs = vec_env.reset()
-for i in range(1000):
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, info = vec_env.step(action)
-    #vec_env.render()
-    # VecEnv resets automatically
-    if done:
-       obs = env.reset(seed=i)
+for i in range(10):
+    obs = vec_env.reset()
+    done = False
+    while not done:
+        action, _states = model.predict(obs, deterministic=True)
+        obs, reward, done, info = vec_env.step(action)
+        #vec_env.render()
+        # VecEnv resets automatically
+        obs_act.append([obs, action])
+        # if done:
+            
+        #     obs = env.reset(seed=i)
 
 env.close()
 oa = pd.DataFrame(obs_act)
