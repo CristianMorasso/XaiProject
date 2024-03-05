@@ -34,20 +34,19 @@ obs_act =  []
 vec_env = model.get_env()
 obs = vec_env.reset()
 for i in range(1000):
-    obs = vec_env.reset()
     done = False
     while not done:
         action, _states = model.predict(obs, deterministic=True)
-        obs_act.append([obs,action])
+        obs_act.append([obs.flatten(), action.flatten()])
         obs, reward, done, info = vec_env.step(action)
         #vec_env.render()
         # VecEnv resets automatically
-        # if done:
-        #     obs = env.reset(seed=i)
 
 env.close()
 #oa = pd.DataFrame(obs_act)
 #oa.columns = ['obs', 'action']
 #oa.to_csv('obs_act.csv')
 np.save("oa.npy", np.array(obs_act))
+
 sys.stdout.close()
+
