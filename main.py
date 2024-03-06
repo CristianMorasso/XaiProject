@@ -27,14 +27,13 @@ env.unwrapped.configure(config)
 obs, info = env.reset()
 model = PPO("MlpPolicy", env, verbose=1)
 vec_env = env
-# model.learn(total_timesteps=10)
-# model.save("ppoHigh")
-# model = PPO.load("ppoHigh", env=env)
+model.learn(total_timesteps=30_000)
+model.save("ppoHigh")
+#model = PPO.load("ppo20k", env=env)
 obs_act =  []
 vec_env = model.get_env()
 obs = vec_env.reset()
-for i in range(2):
-    obs = vec_env.reset()
+for i in range(1000):
     done = False
     while not done:
         action, _states = model.predict(obs, deterministic=True)
@@ -42,17 +41,12 @@ for i in range(2):
         obs, reward, done, info = vec_env.step(action)
         #vec_env.render()
         # VecEnv resets automatically
-        
-        # if done:
-            
-        #     obs = env.reset(seed=i)
 
 env.close()
+#oa = pd.DataFrame(obs_act)
+#oa.columns = ['obs', 'action']
+#oa.to_csv('obs_act.csv')
+np.save("oa.npy", np.array(obs_act))
 
-# oa = pd.DataFrame(obs_act)
-# oa.columns = ['obs', 'action']
-# oa.to_csv('obs_act_test.csv')
-np.save("oa.npy",np.array(obs_act))
-# print(oa["obs"][0])
 sys.stdout.close()
 
